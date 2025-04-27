@@ -1,0 +1,45 @@
+services:
+  influxdb:
+    image: influxdb
+    build: ./.docker/influxdb
+    container_name: influxdb
+    volumes:
+      - influxdb:/var/lib/influxdb
+    ports:
+      - "8653:8086"
+    expose:
+      - 8653
+    restart: always
+
+  grafana:
+    container_name: grafana
+    links:
+      - influxdb:influxdb
+    image: grafana/grafana
+    build: ./.docker/grafana
+    user: "104"
+    ports:
+      - "8857:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_USERS_ALLOW_ORG_CREATE=false
+      - GF_INSTALL_PLUGINS=briangann-datatable-panel
+    volumes:
+      - grafana-home:/var/lib/grafana/
+      - grafana-conf:/etc/grafana/
+    restart: always
+
+  jmeter:
+    container_name: jmeter
+    build: ./.docker/jmeter
+    image: "openjdk:8"
+    entrypoint:
+      - cat
+
+volumes:
+  grafana-home:
+  grafana-conf:
+  influxdb:
